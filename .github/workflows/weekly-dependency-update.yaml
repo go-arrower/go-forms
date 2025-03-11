@@ -1,0 +1,30 @@
+on:
+  schedule:
+    # * is a special character in YAML, so you have to quote this string
+    - cron:  '0 16 * * 5' # every Friday afternoon
+  workflow_dispatch:
+
+name: Weekly Dependency Update
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Update All Dependencies
+        run: |
+          go version
+          make upgrade
+
+      # Enable permissions in GitHub repository or organisation settings: Actions > General > Workflow permissions.
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: Weekly Dependency Update
+          body: Automated upgrade of all dependencies via `make upgrade`
+          commit-message: 'chore: automated dependency update'
+          token: ${{ secrets.PAT }} # trigger automated-tests workflow, see: https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs
