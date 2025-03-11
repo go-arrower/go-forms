@@ -14,7 +14,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.60.3
-          args: --timeout=5m
+          args: --config=.config/golangci.yaml --timeout=5m
 
   security-scan:
     runs-on: ubuntu-latest
