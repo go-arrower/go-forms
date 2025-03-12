@@ -59,7 +59,7 @@ func (t *Text) Input() template.HTML {
 	str += ` value=""`
 
 	if t.required {
-		str += ` required`
+		// str += ` required`
 	}
 
 	str += `/>`

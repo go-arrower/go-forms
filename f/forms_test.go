@@ -60,6 +60,40 @@ func TestValidate(t *testing.T) {
 	})
 }
 
+func TestForm_Validate(t *testing.T) {
+	t.Parallel()
+
+	t.Run("form value populated", func(t *testing.T) {
+		t.Parallel()
+
+		// form := struct {
+		// 	Name *f.Text // TODO make it work with f.Field
+		// }{f.TextField("param")}
+
+		form := f.New().Text("param")
+		// form := f.Build().Text("param")
+
+		assert.True(t, f.Validate(newRequest("param=value"), form))
+		assert.Equal(t, "value", (*form)["param"].Value())
+	})
+
+	t.Run("form with all fields", func(t *testing.T) {
+		t.Parallel()
+
+		form := struct {
+			Name    f.Field // *f.Text
+			Checked f.Field // *f.Boolean
+		}{
+			Name: f.TextField("name-label",
+				f.WithPlaceholder("Your lovely name"),
+			),
+			Checked: f.BooleanField("checked-label"),
+		}
+
+		assert.True(t, f.Validate(newRequest("param=value"), form))
+	})
+}
+
 /*
 	TODO for test cases
 	* give http request to f.Validate

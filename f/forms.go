@@ -131,6 +131,22 @@ func (b *Builder) Fields2() func(yield func(f Field) bool) {
 	}
 }
 
+type Form map[string]Field
+
+func New() *Form {
+	return &Form{}
+}
+
+func (f *Form) Text(label string, opts ...FieldOption) *Form {
+	// f[label] = TextField(label, opts...)
+	(*f)[label] = TextField(label, opts...)
+	return f
+}
+
+func (f *Form) Validate(req *http.Request) []Error {
+	return nil
+}
+
 func Required() FieldOption {
 	return func(f Field) {
 		switch f := f.(type) {
