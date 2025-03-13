@@ -4,11 +4,25 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"reflect"
 
 	"github.com/go-arrower/go-forms/f"
 )
 
-var templ, _ = template.New("").Parse(page)
+var templ, _ = template.New("").Funcs(map[string]any{
+	"fields": func(form any) []any {
+		var ret []any
+
+		rf := reflect.ValueOf(form)
+		for i := range rf.NumField() {
+			field := rf.Field(i)
+			// check that the field implements f.Field, to ensure it is a forms value, continue otherwise
+			ret = append(ret, field.Interface())
+		}
+
+		return ret
+	},
+}).Parse(page)
 
 func main() {
 	http.HandleFunc("/", formIsStructExample)
@@ -25,13 +39,15 @@ func formIsStructExample(res http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost && f.Validate(req, form) {
 		fn := form.FirstName.Value()
 		fmt.Printf("submitted example 1: FirstName=%s\n", fn)
+		fmt.Printf("submitted example 1: Pet=%s\n", form.Pet.Value())
 
 		http.Redirect(res, req, "/1", http.StatusSeeOther)
 	}
 
-	_ = templ.Execute(res, map[string]any{
+	err := templ.Execute(res, map[string]any{
 		"form": form,
 	})
+	fmt.Println(err)
 }
 
 func formBuilderExample(res http.ResponseWriter, req *http.Request) {
@@ -89,13 +105,22 @@ func formBuilder2Example(res http.ResponseWriter, req *http.Request) {
 func YourForm() struct {
 	FirstName *f.Text
 	LastName  f.Field
+	Pet       *f.Select
+	LetsGo    *f.DateTimeLocal
 } {
 	return struct {
 		FirstName *f.Text
 		LastName  f.Field
+		Pet       *f.Select
+		LetsGo    *f.DateTimeLocal
 	}{
 		f.TextField("Your Firstname", f.Required()),
 		f.TextField("Your Lastname"),
+		f.SelectField("Your Favorite Pet", map[string]string{
+			"dog": "Dog",
+			"cat": "Cat",
+		}),
+		f.DateTimeLocalField("Lets Go"),
 	}
 }
 
@@ -136,6 +161,17 @@ const page = `<!DOCTYPE html>
             {{ .form.LastName.Label }}
             {{ .form.LastName.Input }}
         </div>
+		<div class="form-group">
+            {{ .form.Pet.Label }}
+            {{ .form.Pet.Input }}
+        </div>
+
+		<hr />
+		{{ range fields .form }}
+			<div class="form-group">
+				{{ .Full }}
+			</div>
+		{{ end }}
 
 		<input type="submit" value="Submit" />
     </form>
