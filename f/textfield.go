@@ -7,8 +7,14 @@ import (
 
 // TextField constructs a new Text form field.
 func TextField(label string, ops ...FieldOption) *Text {
+	id := attrValue(label)
+
 	field := &Text{
-		label: label,
+		base: base{
+			id:    id,
+			label: label,
+			name:  id,
+		},
 	}
 
 	for _, opt := range ops {
@@ -19,24 +25,13 @@ func TextField(label string, ops ...FieldOption) *Text {
 }
 
 type Text struct {
-	id           string
-	label        string
-	name         string
-	value        string
-	defaultValue string
-	placeholder  string
-	help         string
-	validators   []func(string) error
-	errors       []Error
-	required     bool
-}
-
-func (t *Text) ID() string {
-	return strings.ToLower(t.label)
-}
-
-func (t *Text) Name() string {
-	return strings.ToLower(t.label)
+	base
+	datalist    []string
+	placeholder string
+	help        string
+	validators  []func(string) error
+	errors      []Error
+	required    bool
 }
 
 func (t *Text) Label() template.HTML {
@@ -53,16 +48,31 @@ func (t *Text) Label() template.HTML {
 }
 
 func (t *Text) Input() template.HTML {
-	str := `<input type="text" id="` + strings.ToLower(t.label) + `"`
+	hasList := len(t.datalist) > 0
 
-	str += ` name="` + strings.ToLower(t.label) + `"`
-	str += ` value=""`
+	str := `<input type="text" id="` + t.id + `"`
+	str += ` name="` + t.name + `"`
+	str += ` value="` + t.value + `"`
+
+	if hasList {
+		str += ` list="` + t.id + `-datalist"`
+	}
 
 	if t.required {
-		// str += ` required`
+		str += ` required`
 	}
 
 	str += `/>`
+
+	if hasList {
+		str += `<datalist id="` + t.id + `-datalist">`
+
+		for _, o := range t.datalist {
+			str += `<option value="` + o + `"></option>`
+		}
+
+		str += `</datalist>`
+	}
 
 	return template.HTML(str)
 }
@@ -77,7 +87,7 @@ func (t *Text) Value() string {
 }
 
 func (t *Text) SetValue(val string) {
-	t.value = val
+	t.setValue(val)
 }
 
 // Validate runs all validators on the field

@@ -37,6 +37,47 @@ func TestTextField(t *testing.T) {
 		field.SetValue("my-val")
 		assert.Equal(t, "my-val", field.Value())
 	})
+
+	t.Run("with id", func(t *testing.T) {
+		t.Parallel()
+
+		field := f.TextField("Label", f.WithID("my-id"))
+
+		assert.Equal(t, "my-id", field.ID())
+		assert.Contains(t, field.Input(), "my-id")
+	})
+
+	t.Run("with name", func(t *testing.T) {
+		t.Parallel()
+
+		field := f.TextField("Label", f.WithName("my-name"))
+
+		assert.Equal(t, "my-name", field.Name())
+		assert.Contains(t, field.Input(), "my-name")
+	})
+
+	t.Run("with value", func(t *testing.T) {
+		t.Parallel()
+
+		field := f.TextField("Label", f.WithValue("my-value"))
+
+		assert.Equal(t, "my-value", field.Value())
+		assert.Contains(t, field.Input(), "my-value")
+	})
+
+	t.Run("with list", func(t *testing.T) {
+		t.Parallel()
+
+		field := f.TextField("Label",
+			f.WithID("my-id"),
+			f.WithList([]string{"A", "B"}),
+		)
+
+		assert.Contains(t, field.Input(), `<datalist id="my-id-datalist">`)
+		assert.Contains(t, field.Input(), `<option value="A"></option>`)
+		assert.Contains(t, field.Input(), `<option value="B"></option>`)
+		assert.Contains(t, field.Input(), `</datalist>`)
+	})
 }
 
 // This test case is to ensure the field works in its entirety.

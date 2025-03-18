@@ -7,7 +7,9 @@ import (
 
 func DateTimeLocalField(label string, ops ...FieldOption) *DateTimeLocal {
 	field := &DateTimeLocal{
-		label: label,
+		base: base{
+			label: label,
+		},
 	}
 
 	for _, opt := range ops {
@@ -18,7 +20,7 @@ func DateTimeLocalField(label string, ops ...FieldOption) *DateTimeLocal {
 }
 
 type DateTimeLocal struct {
-	label      string
+	base
 	value      string
 	validators []func(string) error
 	errors     []Error

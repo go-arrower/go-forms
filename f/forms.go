@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 type Field interface {
@@ -20,45 +21,63 @@ type Field interface {
 	SetValue(val string) // could be any, as validation does cast already and does not work on string values alone
 }
 
-type FieldOption func(Field)
+type FieldOption func(customField)
 
 func WithID(id string) FieldOption {
-	return func(field Field) {
-		switch f := field.(type) {
-		case *Text:
-			f.id = id
-		case *Boolean:
-			f.id = id
-		default:
-			slog.Log(context.Background(), slog.LevelDebug, "unsupported f Field type")
-		}
+	return func(field customField) {
+		field.setID(id)
 	}
 }
 
 func WithName(name string) FieldOption {
-	return func(field Field) {
+	return func(field customField) {
+		field.setName(name)
+	}
+}
+
+func WithValue(value any) FieldOption {
+	return func(field customField) {
+		field.setValue(value)
+	}
+}
+
+func WithList(options []string) FieldOption {
+	return func(field customField) {
 		switch f := field.(type) {
 		case *Text:
-			f.name = name
-		case *Boolean:
-			f.name = name
-		default:
-			slog.Log(context.Background(), slog.LevelDebug, "unsupported f Field type")
+			f.datalist = options
 		}
 	}
 }
 
 func WithPlaceholder(placeholder string) FieldOption {
-	return func(field Field) {
+	return func(field customField) {
 		switch f := field.(type) {
 		case *Text:
-			f.placeholder = placeholder
-		case *Boolean:
 			f.placeholder = placeholder
 		default:
 			slog.Log(context.Background(), slog.LevelDebug, "unsupported f Field type")
 		}
 	}
+}
+
+// customField needs to be implemented by every Field.
+// This allows to easily add new fields. The only alternative is
+// to switch on the type of field in wach FieldOption and set the values there.
+// This would mean that for each new field, there would be multiple
+// places that need to extend the code.
+type customField interface {
+	setID(string)
+	setName(string)
+	setValue(any)
+}
+
+// attrValue takes a label given by the user and converts in into a form,
+// that is ready to use as a HTML id and name attribute.
+// MDN recommends stricter rules, it is left to the developer.
+// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id
+func attrValue(label string) string {
+	return strings.ReplaceAll(strings.ToLower(label), " ", "-")
 }
 
 // TODO consider: also return the errors, so the caller can make the decision to render the form or branch out to other logic
@@ -148,7 +167,7 @@ func (f *Form) Validate(req *http.Request) []Error {
 }
 
 func Required() FieldOption {
-	return func(f Field) {
+	return func(f customField) {
 		switch f := f.(type) {
 		case *Text:
 			f.required = true

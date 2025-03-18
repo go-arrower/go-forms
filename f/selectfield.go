@@ -7,7 +7,9 @@ import (
 
 func SelectField(label string, choices map[string]string, ops ...FieldOption) *Select {
 	field := &Select{
-		label:   label,
+		base: base{
+			label: label,
+		},
 		choices: choices,
 	}
 
@@ -19,7 +21,7 @@ func SelectField(label string, choices map[string]string, ops ...FieldOption) *S
 }
 
 type Select struct {
-	label      string
+	base
 	choices    map[string]string
 	value      string
 	validators []func(string) error
