@@ -12,9 +12,9 @@ func DateTimeLocalField(label string, ops ...FieldOption) *DateTimeLocal {
 		},
 	}
 
-	for _, opt := range ops {
-		opt(field)
-	}
+	// for _, opt := range ops {
+	// opt(field)
+	// }
 
 	return field
 }
@@ -63,7 +63,7 @@ func (s *DateTimeLocal) SetValue(val string) {
 	s.value = val
 }
 
-// Validate runs all validators on the field
+// Validate runs all validators on the inputElement
 func (s *DateTimeLocal) Validate() bool {
 	for _, validator := range s.validators {
 		if err := validator(s.value); err != nil {

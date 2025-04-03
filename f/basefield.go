@@ -3,12 +3,12 @@ package f
 type base struct {
 	id           string
 	label        string
-	name         string
+	htmlName     string
 	value        string
 	defaultValue string
 }
 
-var _ customField = (*base)(nil)
+// var _ inputElement = (*base)(nil)
 
 func (b *base) ID() string {
 	return b.id
@@ -18,12 +18,12 @@ func (b *base) setID(id string) {
 	b.id = id
 }
 
-func (b *base) Name() string {
-	return b.name
+func (b *base) name() string {
+	return b.htmlName
 }
 
 func (b *base) setName(name string) {
-	b.name = name
+	b.htmlName = name
 }
 
 func (b *base) setValue(value any) {

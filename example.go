@@ -9,120 +9,71 @@ import (
 	"github.com/go-arrower/go-forms/f"
 )
 
+func main() {
+	http.HandleFunc("/", formExample)
+
+	_ = http.ListenAndServe(":8080", nil)
+}
+
+type MyForm struct {
+	FirstName f.Text
+	LastName  f.Text
+	Pet       f.Text
+}
+
+func formExample(res http.ResponseWriter, req *http.Request) {
+	form := f.New(MyForm{
+		FirstName: f.TextField("my-name"),
+	})
+
+	if req.Method == http.MethodPost && f.Validate(form, req) {
+		fn := form.FirstName.Value()
+		fmt.Printf("submitted example 1: FirstName=%s\n", fn)
+		fmt.Printf("submitted example 1: Pet=%s\n", form.Pet.Value())
+
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+	}
+
+	err := templ.Execute(res, map[string]any{
+		"form": form,
+	})
+	fmt.Println(err)
+}
+
 var templ, _ = template.New("").Funcs(map[string]any{
-	"fields": func(form any) []any {
+	"old": func(form any) []any {
 		var ret []any
 
 		rf := reflect.ValueOf(form)
-		for i := range rf.NumField() {
-			field := rf.Field(i)
-			// check that the field implements f.Field, to ensure it is a forms value, continue otherwise
+		fmt.Println(rf)
+		fmt.Println(rf.Elem().Type())
+		fmt.Println(rf.Elem().Kind())
+
+		for i := range rf.Elem().NumField() {
+			field := rf.Elem().Field(i)
+			// check that the field implements f.field, to ensure it is a forms value, continue otherwise
 			ret = append(ret, field.Interface())
 		}
 
 		return ret
 	},
+	"fields2": func(form any) []any {
+		v := reflect.ValueOf(form).Elem()
+		// if v.Kind() != reflect.Struct {
+		// 	return nil
+		// }
+
+		fmt.Println("TMPL FUNC", v.NumField())
+		out := make([]any, v.NumField())
+		for i := 0; i < v.NumField(); i++ {
+			out[i] = v.Field(i).Addr().Interface()
+			// out[i] = "HIER"
+			fmt.Println("REFECT FIELD", i, v.Field(i).Type().Name(), v.Field(i).Kind())
+		}
+
+		return out
+	},
 }).Parse(page)
-
-func main() {
-	http.HandleFunc("/", formIsStructExample)
-	http.HandleFunc("/1", formIsStructExample)
-	http.HandleFunc("/2", formBuilderExample)
-	http.HandleFunc("/3", formBuilder2Example)
-
-	_ = http.ListenAndServe(":8080", nil)
-}
-
-func formIsStructExample(res http.ResponseWriter, req *http.Request) {
-	form := YourForm()
-
-	if req.Method == http.MethodPost && f.Validate(req, form) {
-		fn := form.FirstName.Value()
-		fmt.Printf("submitted example 1: FirstName=%s\n", fn)
-		fmt.Printf("submitted example 1: Pet=%s\n", form.Pet.Value())
-
-		http.Redirect(res, req, "/1", http.StatusSeeOther)
-	}
-
-	err := templ.Execute(res, map[string]any{
-		"form": form,
-	})
-	fmt.Println(err)
-}
-
-func formBuilderExample(res http.ResponseWriter, req *http.Request) {
-	form := f.Build().
-		Text("FirstName", f.Required()). // the label has to match the key in the template
-		Text("LastName")
-
-	if req.Method == http.MethodPost { // && form.Validate(req) {
-		fn := form.Fields["FirstName"] // .Value() // type any
-		fmt.Printf("submitted example 2: FirstName=%s\n", fn)
-
-		http.Redirect(res, req, "/2", http.StatusSeeOther)
-	}
-
-	err := templ.Execute(res, map[string]any{
-		"form": form.Form(),
-	})
-	fmt.Println(err)
-}
-
-func formBuilder2Example(res http.ResponseWriter, req *http.Request) {
-	form := f.New().
-		Text("FirstName", f.Required()). // the label has to match the key in the template
-		Text("LastName")
-
-	if req.Method == http.MethodPost { // && form.Validate(req) {
-		fn := (*form)["FirstName"] // .Value() // type any
-		fmt.Printf("submitted example 2: FirstName=%s\n", fn)
-
-		http.Redirect(res, req, "/3", http.StatusSeeOther)
-	}
-
-	err := templ.Execute(res, map[string]any{
-		"form": form,
-	})
-	fmt.Println(err)
-}
-
-/*
-	form := f.New(Method(f.POST)).Text("Your Name")
-	err := templ.Execute(res, map[string]any{
-		"form": form.View(),
-	})
-
-	// in the HTML
-	{{ .form.Full }}
-	{{ range .form  }}
-		{{ .Full }}
-	{{ end }}
-
-	// Alternative: use template functions
-	{{ full_form .form }}
-*/
-
-func YourForm() struct {
-	FirstName *f.Text
-	LastName  f.Field
-	Pet       *f.Select
-	LetsGo    *f.DateTimeLocal
-} {
-	return struct {
-		FirstName *f.Text
-		LastName  f.Field
-		Pet       *f.Select
-		LetsGo    *f.DateTimeLocal
-	}{
-		f.TextField("Your Firstname", f.Required()),
-		f.TextField("Your Lastname"),
-		f.SelectField("Your Favorite Pet", map[string]string{
-			"dog": "Dog",
-			"cat": "Cat",
-		}),
-		f.DateTimeLocalField("Lets Go"),
-	}
-}
 
 const page = `<!DOCTYPE html>
 <html>
@@ -167,9 +118,10 @@ const page = `<!DOCTYPE html>
         </div>
 
 		<hr />
-		{{ range fields .form }}
+		<hr />
+		{{ range fields2 .form }}
 			<div class="form-group">
-				{{ .Full }}
+				{{ .Full }}<-
 			</div>
 		{{ end }}
 

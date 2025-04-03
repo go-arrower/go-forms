@@ -13,9 +13,9 @@ func SelectField(label string, choices map[string]string, ops ...FieldOption) *S
 		choices: choices,
 	}
 
-	for _, opt := range ops {
-		opt(field)
-	}
+	// for _, opt := range ops {
+	// 	opt(field)
+	// }
 
 	return field
 }
@@ -75,7 +75,7 @@ func (s *Select) SetValue(val string) {
 	s.value = val
 }
 
-// Validate runs all validators on the field
+// Validate runs all validators on the inputElement
 func (s *Select) Validate() bool {
 	for _, validator := range s.validators {
 		if err := validator(s.value); err != nil {

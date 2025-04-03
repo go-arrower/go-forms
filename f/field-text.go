@@ -5,20 +5,20 @@ import (
 	"strings"
 )
 
-// TextField constructs a new Text form field.
-func TextField(label string, ops ...FieldOption) *Text {
+// TextField constructs a new Text form inputElement.
+func TextField(label string, ops ...FieldOption) Text {
 	id := attrValue(label)
 
-	field := &Text{
+	field := Text{
 		base: base{
-			id:    id,
-			label: label,
-			name:  id,
+			id:       id,
+			label:    label,
+			htmlName: id,
 		},
 	}
 
 	for _, opt := range ops {
-		opt(field)
+		opt(&field)
 	}
 
 	return field
@@ -51,7 +51,7 @@ func (t *Text) Input() template.HTML {
 	hasList := len(t.datalist) > 0
 
 	str := `<input type="text" id="` + t.id + `"`
-	str += ` name="` + t.name + `"`
+	str += ` name="` + t.htmlName + `"`
 	str += ` value="` + t.value + `"`
 
 	if hasList {
@@ -86,12 +86,12 @@ func (t *Text) Value() string {
 	return t.value
 }
 
-func (t *Text) SetValue(val string) {
-	t.setValue(val)
+func (t *Text) setBase(base base) {
+	t.base = base
 }
 
-// Validate runs all validators on the field
-func (t *Text) Validate() bool {
+// Validate runs all validators on the inputElement
+func (t *Text) validate() bool {
 	for _, validator := range t.validators {
 		if err := validator(t.value); err != nil {
 			t.errors = append(t.errors, Error{Key: t.label, Message: err.Error()})
