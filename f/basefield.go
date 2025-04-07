@@ -10,9 +10,9 @@ type base struct {
 
 // var _ inputElement = (*base)(nil)
 
-func (b *base) ID() string {
-	return b.id
-}
+// func (b *base) ID() string {
+// 	return b.id
+// }
 
 func (b *base) setID(id string) {
 	b.id = id

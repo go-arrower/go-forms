@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func SelectField(label string, choices map[string]string, ops ...FieldOption) *Select {
+func SelectField(label string, choices map[string]string, ops ...any) *Select {
 	field := &Select{
 		base: base{
 			label: label,

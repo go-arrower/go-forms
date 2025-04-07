@@ -12,18 +12,17 @@ func (e Error) String() string {
 	return e.Key + " " + e.Message
 }
 
-func Required() FieldOption {
-	return func(f inputElement) {
-		switch f := f.(type) {
-		case *Text:
-			f.required = true
-			f.validators = append(f.validators, func(value string) error {
-				if value == "" {
-					return errors.New("is required")
-				}
+func Required() requiredValidator {
+	return requiredValidator(true)
+}
 
-				return nil
-			})
+func (val requiredValidator) applyTextOption(f *Text) {
+	f.required = true
+	f.validators = append(f.validators, func(value string) error {
+		if value == "" {
+			return errors.New("is required")
 		}
-	}
+
+		return nil
+	})
 }

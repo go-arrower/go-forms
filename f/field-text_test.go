@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"html/template"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,6 +17,18 @@ var ctx = context.Background()
 func TestTextField(t *testing.T) {
 	t.Parallel()
 
+	t.Run("implements methods", func(t *testing.T) {
+		t.Parallel()
+
+		for _, m := range []string{"Value", "Label", "Input", "Full"} {
+			field := f.TextField("")
+			tf := reflect.TypeOf(&field)
+
+			_, exists := tf.MethodByName(m)
+			assert.True(t, exists, "*%s should implement method %s()", tf.Elem().Name(), m)
+		}
+	})
+
 	t.Run("defaults", func(t *testing.T) {
 		t.Parallel()
 
@@ -25,8 +38,6 @@ func TestTextField(t *testing.T) {
 
 		field := f.TextField("Label")
 
-		assert.Equal(t, "label", field.ID())
-		// assert.Equal(t, "label", field.Name())
 		assert.Equal(t, label, field.Label())
 		assert.Equal(t, html, field.Input())
 		assert.Equal(t, full, field.Full())
@@ -34,17 +45,18 @@ func TestTextField(t *testing.T) {
 		assert.Empty(t, field.Value())
 		assert.Nil(t, field.Errors())
 
-		// field.setValue("my-val")
-		assert.Equal(t, "my-val", field.Value())
+		// field.setValue("my-val") // TODO is this is a shared suite maybe this can be asserted again
+		// assert.Equal(t, "my-val", field.Value())
 	})
 
-	t.Run("with id", func(t *testing.T) {
+	t.Run("WithID", func(t *testing.T) {
 		t.Parallel()
 
 		field := f.TextField("Label", f.WithID("my-id"))
 
-		assert.Equal(t, "my-id", field.ID())
-		assert.Contains(t, field.Input(), "my-id")
+		assert.Contains(t, field.Input(), `id="my-id"`)
+		assert.Contains(t, field.Input(), `name="label"`, "option should only change id attribute")
+		assert.Contains(t, field.Label(), `for="label"`, "option should only change id attribute")
 	})
 
 	t.Run("with name", func(t *testing.T) {
@@ -98,9 +110,9 @@ func TestTextField_HTMLRendering(t *testing.T) {
 
 		buf := &bytes.Buffer{}
 		err = templ.Execute(buf, map[string]any{
-			"form": NameForm{
+			"form": f.New(NameForm{
 				// Name: f.TextField("Your name"),
-			},
+			}),
 		})
 		assert.NoError(t, err)
 
@@ -125,9 +137,9 @@ func TestTextField_HTMLRendering(t *testing.T) {
 			</form>`)
 		assert.NoError(t, err)
 
-		form := NameForm{
-			// Name: f.TextField("Your name", f.Required()),
-		}
+		form := f.New(NameForm{
+			Name: f.TextField("Your name", f.Required()),
+		})
 		f.Validate(form, newRequest(""))
 
 		buf := &bytes.Buffer{}
@@ -152,5 +164,5 @@ func TestRequired(t *testing.T) {
 }
 
 type NameForm struct {
-	// Name f.inputElement
+	Name f.Text
 }

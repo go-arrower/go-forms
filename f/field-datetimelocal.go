@@ -5,16 +5,16 @@ import (
 	"strings"
 )
 
-func DateTimeLocalField(label string, ops ...FieldOption) *DateTimeLocal {
-	field := &DateTimeLocal{
+func DateTimeLocalField(label string, ops ...dateTimeLocalElement) DateTimeLocal {
+	field := DateTimeLocal{
 		base: base{
 			label: label,
 		},
 	}
 
-	// for _, opt := range ops {
-	// opt(field)
-	// }
+	for _, opt := range ops {
+		opt.applyDateTimeLocalOption(&field)
+	}
 
 	return field
 }

@@ -6,7 +6,7 @@ import (
 )
 
 // TextField constructs a new Text form inputElement.
-func TextField(label string, ops ...FieldOption) Text {
+func TextField(label string, ops ...textElement) Text {
 	id := attrValue(label)
 
 	field := Text{
@@ -18,7 +18,7 @@ func TextField(label string, ops ...FieldOption) Text {
 	}
 
 	for _, opt := range ops {
-		opt(&field)
+		opt.applyTextOption(&field)
 	}
 
 	return field
@@ -26,6 +26,8 @@ func TextField(label string, ops ...FieldOption) Text {
 
 type Text struct {
 	base
+	maxlength   int
+	minlength   int
 	datalist    []string
 	placeholder string
 	help        string

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func BooleanField(label string, ops ...FieldOption) *Boolean {
+func BooleanField(label string, ops ...any) *Boolean {
 	return &Boolean{label: label}
 }
 
