@@ -29,13 +29,20 @@ func New[F any](form F) *F {
 				panic("field " + ft.Field(i).Name + " of " + reflect.TypeOf(form).Name() + " is not an inputElement")
 			}
 
-			id := attrValue(ft.Field(i).Name)
+			id := htmlAttr(ft.Field(i).Name)
 			field.setBase(base{
 				id:           id,
 				label:        ft.Field(i).Name,
 				htmlName:     id,
 				value:        "",
+				validators:   nil,
+				errors:       nil,
+				required:     false,
+				disabled:     false,
 				defaultValue: "",
+				title:        "",
+				form:         "",
+				autofocus:    false,
 			})
 		}
 	}
@@ -81,23 +88,23 @@ func Validate(form any, req *http.Request) bool {
 type inputElement interface {
 	validate() bool
 
+	setBase(base base)
+
+	setID(id string)
+
 	// name is the HTML attribute `name` used in the form.
 	name() string
 	setName(name string)
 
 	// setValue takes the val from the http request via FormValue.
 	// The inputElement implementation can cast this to it's preferred type.
-	setValue(val any)
-
-	setBase(base base)
-
-	setID(string)
+	setValue(value any)
 }
 
-// attrValue takes a label given by the user and converts in into a form,
+// htmlAttr takes a label given by the user and converts in into a form,
 // that is ready to use as a HTML id and name attribute.
 // MDN recommends stricter rules, it is left to the developer.
 // See: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id
-func attrValue(label string) string {
+func htmlAttr(label string) string {
 	return strings.ReplaceAll(strings.ToLower(label), " ", "-")
 }

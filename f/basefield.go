@@ -1,18 +1,30 @@
 package f
 
 type base struct {
-	id           string
-	label        string
-	htmlName     string
-	value        string
+	id       string
+	label    string
+	htmlName string
+	// value is of type string. This is a convenience as it works for many
+	// input types. If an input type has a different type, it has to overwrite
+	// this definition.
+	value      string
+	validators []func(string) error
+	errors     []Error
+
+	required     bool
+	disabled     bool
 	defaultValue string
+
+	title     string
+	form      string
+	autofocus bool
 }
 
-// var _ inputElement = (*base)(nil)
+var _ inputElement = (*base)(nil)
 
-// func (b *base) ID() string {
-// 	return b.id
-// }
+func (b *base) setBase(base base) {
+	*b = base
+}
 
 func (b *base) setID(id string) {
 	b.id = id
@@ -27,5 +39,14 @@ func (b *base) setName(name string) {
 }
 
 func (b *base) setValue(value any) {
-	b.value = value.(string)
+	val, ok := value.(string)
+	if !ok {
+		panic("go-forms: this field is implemented incorrectly: `base` assumes string type for value")
+	}
+
+	b.value = val
+}
+
+func (b *base) validate() bool {
+	panic("go-forms: this method MUST NOT be called on struct `base`, but on a field")
 }

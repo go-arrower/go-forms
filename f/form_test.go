@@ -20,9 +20,19 @@ func TestNew(t *testing.T) {
 
 		form := f.New(myForm{})
 
+		assert.Equal(t, "", form.Firstname.Value())
 		assert.Contains(t, form.Firstname.Label(), "Firstname")
+		assert.Contains(t, form.Firstname.Label(), ` for="firstname"`)
+		assert.Contains(t, form.Firstname.Input(), ` id="firstname"`)
+		assert.Contains(t, form.Firstname.Input(), ` name="firstname"`)
+		assert.Empty(t, form.Firstname.Errors())
+
+		assert.Equal(t, "", form.Lastname.Value())
 		assert.Contains(t, form.Lastname.Label(), "Lastname")
-		// TODO assert on other defaults like ID, name etc
+		assert.Contains(t, form.Lastname.Label(), ` for="lastname"`)
+		assert.Contains(t, form.Lastname.Input(), ` id="lastname"`)
+		assert.Contains(t, form.Lastname.Input(), ` name="lastname"`)
+		assert.Empty(t, form.Lastname.Errors())
 	})
 
 	t.Run("overwrites", func(t *testing.T) {
