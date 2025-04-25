@@ -3,7 +3,6 @@ package f
 import (
 	"html/template"
 	"strconv"
-	"strings"
 )
 
 // TextField constructs a new Text form inputElement.
@@ -58,7 +57,7 @@ type Text struct {
 }
 
 func (t *Text) Label() template.HTML {
-	str := `<label for="` + strings.ToLower(t.label) + `">`
+	str := `<label for="` + htmlAttr(t.label) + `">`
 
 	str += t.label
 	if t.required {

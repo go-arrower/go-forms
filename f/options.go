@@ -123,6 +123,10 @@ func (o nameOption) applyTextOption(f *Text) {
 	f.htmlName = string(o)
 }
 
+func (o nameOption) applyDateTimeLocalOption(f *DateTimeLocal) {
+	f.htmlName = string(o)
+}
+
 func (o valueOption) applyTextOption(f *Text) {
 	val, ok := o.value.(string)
 	if !ok {
@@ -132,11 +136,28 @@ func (o valueOption) applyTextOption(f *Text) {
 	f.value = val
 }
 
+func (o valueOption) applyDateTimeLocalOption(f *DateTimeLocal) {
+	val, ok := o.value.(time.Time)
+	if !ok {
+		panic("go-forms: WithValue for `DateTimeLocal` required a time.Time")
+	}
+
+	f.value = val.Format(time.RFC3339Nano)
+}
+
 func (o disabledOption) applyTextOption(f *Text) {
 	f.disabled = bool(o)
 }
 
+func (o disabledOption) applyDateTimeLocalOption(f *DateTimeLocal) {
+	f.disabled = bool(o)
+}
+
 func (o readonlyOption) applyTextOption(f *Text) {
+	f.readonly = bool(o)
+}
+
+func (o readonlyOption) applyDateTimeLocalOption(f *DateTimeLocal) {
 	f.readonly = bool(o)
 }
 

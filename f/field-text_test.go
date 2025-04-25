@@ -62,7 +62,7 @@ func TestTextField(t *testing.T) {
 		assert.Nil(t, field.Errors())
 	})
 
-	t.Run("WithID", func(t *testing.T) {
+	t.Run("with id", func(t *testing.T) {
 		t.Parallel()
 
 		field := f.TextField("Label", f.WithID("my-id"))
@@ -77,8 +77,7 @@ func TestTextField(t *testing.T) {
 
 		field := f.TextField("Label", f.WithName("my-name"))
 
-		// assert.Equal(t, "my-name", field.Name())
-		assert.Contains(t, field.Input(), "my-name")
+		assert.Contains(t, field.Input(), `name="my-name"`)
 	})
 
 	t.Run("with value", func(t *testing.T) {
@@ -114,8 +113,8 @@ func TestTextField(t *testing.T) {
 
 		field := f.TextField("Label", f.WithDisabled())
 
-		assert.Contains(t, field.Input(), "disabled")
-		assert.Contains(t, field.Full(), "disabled")
+		assert.Contains(t, field.Input(), " disabled")
+		assert.Contains(t, field.Full(), " disabled")
 	})
 
 	t.Run("with readonly", func(t *testing.T) {
@@ -123,8 +122,8 @@ func TestTextField(t *testing.T) {
 
 		field := f.TextField("Label", f.WithReadonly())
 
-		assert.Contains(t, field.Input(), "readonly")
-		assert.Contains(t, field.Full(), "readonly")
+		assert.Contains(t, field.Input(), " readonly")
+		assert.Contains(t, field.Full(), " readonly")
 	})
 
 	t.Run("with placeholder", func(t *testing.T) {
