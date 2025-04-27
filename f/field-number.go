@@ -53,7 +53,7 @@ func (n *Number) Label() template.HTML {
 	return template.HTML(str)
 }
 
-func (n *Number) Input() template.HTML {
+func (n *Number) Input(attr ...string) template.HTML {
 	var value string
 
 	if n.hasValue {
@@ -63,6 +63,12 @@ func (n *Number) Input() template.HTML {
 	str := `<input type="number" id="` + n.htmlID + `"`
 	str += ` name="` + n.htmlName + `"`
 	str += ` value="` + value + `"`
+
+	if len(attr) > 0 && len(attr)%2 == 0 {
+		if attr[0] == "class" {
+			str += ` class="` + attr[1] + `"`
+		}
+	}
 
 	if n.disabled {
 		str += ` disabled`

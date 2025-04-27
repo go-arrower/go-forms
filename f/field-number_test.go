@@ -123,4 +123,12 @@ func TestNumberField(t *testing.T) {
 		assert.Contains(t, field.Input(), " readonly")
 		assert.Contains(t, field.Full(), " readonly")
 	})
+
+	t.Run("with input attributes", func(t *testing.T) {
+		t.Parallel()
+
+		field := f.NumberField("Label")
+
+		assert.Contains(t, field.Input("class", "my-class"), ` class="my-class"`)
+	})
 }
