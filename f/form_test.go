@@ -35,6 +35,19 @@ func TestNew(t *testing.T) {
 		assert.Empty(t, form.Lastname.Errors())
 	})
 
+	t.Run("initialise default html attributes", func(t *testing.T) {
+		t.Parallel()
+
+		form := f.New(myForm{
+			Firstname: f.TextField("", f.WithValue("my-value")),
+		})
+
+		assert.Contains(t, form.Firstname.Label(), "></label>")
+		assert.Contains(t, form.Firstname.Label(), ` for="firstname"`)
+		assert.Contains(t, form.Firstname.Input(), ` id="firstname"`)
+		assert.Contains(t, form.Firstname.Input(), ` name="firstname"`)
+	})
+
 	t.Run("overwrites", func(t *testing.T) {
 		t.Parallel()
 

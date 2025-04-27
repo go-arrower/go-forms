@@ -1,7 +1,7 @@
 package f
 
 type base struct {
-	id       string
+	htmlID   string
 	label    string
 	htmlName string
 	// value is of type string. This is a convenience as it works for many
@@ -22,12 +22,20 @@ type base struct {
 
 var _ inputElement = (*base)(nil)
 
+func (b *base) base() *base {
+	return b
+}
+
 func (b *base) setBase(base base) {
 	*b = base
 }
 
+func (b *base) id() string {
+	return b.htmlID
+}
+
 func (b *base) setID(id string) {
-	b.id = id
+	b.htmlID = id
 }
 
 func (b *base) name() string {

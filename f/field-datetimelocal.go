@@ -1,6 +1,7 @@
 package f
 
 import (
+	"errors"
 	"html/template"
 	"time"
 )
@@ -10,11 +11,20 @@ func DateTimeLocalField(label string, ops ...dateTimeLocalElement) DateTimeLocal
 
 	field := DateTimeLocal{
 		base: base{
-			id:           id,
-			label:        label,
-			htmlName:     id,
-			value:        "",
-			validators:   nil,
+			htmlID:   id,
+			label:    label,
+			htmlName: id,
+			value:    "",
+			validators: []func(string) error{
+				func(value string) error {
+					_, err := time.ParseInLocation(browserLayout, value, time.UTC)
+					if err != nil {
+						return errors.New("invalid format")
+					}
+
+					return nil
+				},
+			},
 			errors:       nil,
 			required:     false,
 			disabled:     false,
@@ -39,7 +49,7 @@ type DateTimeLocal struct {
 }
 
 func (t *DateTimeLocal) Label() template.HTML {
-	str := `<label for="` + htmlAttr(t.label) + `">`
+	str := `<label for="` + t.htmlID + `">`
 	str += t.label
 	str += `</label>`
 
@@ -47,7 +57,7 @@ func (t *DateTimeLocal) Label() template.HTML {
 }
 
 func (t *DateTimeLocal) Input() template.HTML {
-	str := `<input type="datetime-local" id="` + t.id + `"`
+	str := `<input type="datetime-local" id="` + t.htmlID + `"`
 	str += ` name="` + t.htmlName + `"`
 	str += ` value="` + t.value + `"`
 
@@ -83,8 +93,8 @@ func (t *DateTimeLocal) Errors() []Error {
 }
 
 func (t *DateTimeLocal) Value() time.Time {
-	time, _ := time.Parse(time.RFC3339Nano, t.value)
-	return time
+	dt, _ := time.ParseInLocation(browserLayout, t.value, time.UTC)
+	return dt
 }
 
 // TODO can this be moved to base?
@@ -116,3 +126,8 @@ var (
 	// _ dateTimeLocalElement = (*stepOption)(nil)
 	// _ dateTimeLocalElement = (*tabindexOption)(nil)
 )
+
+// browserLayout is how the browser returns the value.
+// This is independent of how it is formatted to the user in the browser.
+// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#value
+const browserLayout = "2006-01-02T15:04"

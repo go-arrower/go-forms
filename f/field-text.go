@@ -11,7 +11,7 @@ func TextField(label string, ops ...textElement) Text {
 
 	field := Text{
 		base: base{
-			id:           id,
+			htmlID:       id,
 			label:        label,
 			htmlName:     id,
 			value:        "",
@@ -57,7 +57,7 @@ type Text struct {
 }
 
 func (t *Text) Label() template.HTML {
-	str := `<label for="` + htmlAttr(t.label) + `">`
+	str := `<label for="` + t.htmlID + `">`
 
 	str += t.label
 	if t.required {
@@ -72,7 +72,7 @@ func (t *Text) Label() template.HTML {
 func (t *Text) Input() template.HTML {
 	hasList := len(t.datalist) > 0
 
-	str := `<input type="text" id="` + t.id + `"`
+	str := `<input type="text" id="` + t.htmlID + `"`
 	str += ` name="` + t.htmlName + `"`
 	str += ` value="` + t.value + `"`
 
@@ -93,7 +93,7 @@ func (t *Text) Input() template.HTML {
 	}
 
 	if hasList {
-		str += ` list="` + t.id + `-datalist"`
+		str += ` list="` + t.htmlID + `-datalist"`
 	}
 
 	if t.autocomplete != "" {
@@ -140,7 +140,7 @@ func (t *Text) Input() template.HTML {
 	str += `/>`
 
 	if hasList {
-		str += `<datalist id="` + t.id + `-datalist">`
+		str += `<datalist id="` + t.htmlID + `-datalist">`
 
 		for _, o := range t.datalist {
 			str += `<option value="` + o + `"></option>`
@@ -205,4 +205,5 @@ var (
 	_ textElement = (*formOption)(nil)
 	// _ textElement = (*tabindexOption)(nil)
 	_ textElement = (*autofocusOption)(nil)
+	// inputmode="numeric", see: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/number#using_number_inputs
 )

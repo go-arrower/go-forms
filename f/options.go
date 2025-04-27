@@ -75,8 +75,16 @@ type (
 		applyTextOption(f *Text)
 	}
 
+	numberElement interface {
+		applyNumberOption(f *Number)
+	}
+
 	dateTimeLocalElement interface {
 		applyDateTimeLocalOption(f *DateTimeLocal)
+	}
+
+	submitElement interface {
+		applySubmitOption(f *Submit)
 	}
 )
 
@@ -112,14 +120,22 @@ const (
 )
 
 func (o idOption) applyTextOption(f *Text) {
-	f.id = string(o)
+	f.htmlID = string(o)
+}
+
+func (o idOption) applyNumberOption(f *Number) {
+	f.htmlID = string(o)
 }
 
 func (o idOption) applyDateTimeLocalOption(f *DateTimeLocal) {
-	f.id = string(o)
+	f.htmlID = string(o)
 }
 
 func (o nameOption) applyTextOption(f *Text) {
+	f.htmlName = string(o)
+}
+
+func (o nameOption) applyNumberOption(f *Number) {
 	f.htmlName = string(o)
 }
 
@@ -136,16 +152,29 @@ func (o valueOption) applyTextOption(f *Text) {
 	f.value = val
 }
 
+func (o valueOption) applyNumberOption(f *Number) {
+	val, ok := o.value.(int)
+	if !ok {
+		panic("go-forms: WithValue for `Number` required an int")
+	}
+
+	f.value = val
+	f.hasValue = true
+}
 func (o valueOption) applyDateTimeLocalOption(f *DateTimeLocal) {
 	val, ok := o.value.(time.Time)
 	if !ok {
 		panic("go-forms: WithValue for `DateTimeLocal` required a time.Time")
 	}
 
-	f.value = val.Format(time.RFC3339Nano)
+	f.value = val.Format(browserLayout)
 }
 
 func (o disabledOption) applyTextOption(f *Text) {
+	f.disabled = bool(o)
+}
+
+func (o disabledOption) applyNumberOption(f *Number) {
 	f.disabled = bool(o)
 }
 
@@ -153,7 +182,15 @@ func (o disabledOption) applyDateTimeLocalOption(f *DateTimeLocal) {
 	f.disabled = bool(o)
 }
 
+func (o disabledOption) applySubmitOption(f *Submit) {
+	f.disabled = bool(o)
+}
+
 func (o readonlyOption) applyTextOption(f *Text) {
+	f.readonly = bool(o)
+}
+
+func (o readonlyOption) applyNumberOption(f *Number) {
 	f.readonly = bool(o)
 }
 

@@ -69,7 +69,7 @@ func TestTextField(t *testing.T) {
 
 		assert.Contains(t, field.Input(), `id="my-id"`)
 		assert.Contains(t, field.Input(), `name="label"`, "option should only change id attribute")
-		assert.Contains(t, field.Label(), `for="label"`, "option should only change id attribute")
+		assert.Contains(t, field.Label(), `for="my-id"`, "option should only change id attribute")
 	})
 
 	t.Run("with name", func(t *testing.T) {

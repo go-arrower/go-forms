@@ -23,15 +23,16 @@ func New[F any](form F) *F {
 	}
 
 	for i := range fv.NumField() {
-		if fv.Field(i).IsZero() {
-			field, ok := fv.Field(i).Addr().Interface().(inputElement)
-			if !ok {
-				panic("field " + ft.Field(i).Name + " of " + reflect.TypeOf(form).Name() + " is not an inputElement")
-			}
+		id := htmlAttr(ft.Field(i).Name)
 
-			id := htmlAttr(ft.Field(i).Name)
+		field, ok := fv.Field(i).Addr().Interface().(inputElement)
+		if !ok {
+			panic("field " + ft.Field(i).Name + " of " + reflect.TypeOf(form).Name() + " is not an inputElement")
+		}
+
+		if fv.Field(i).IsZero() {
 			field.setBase(base{
-				id:           id,
+				htmlID:       id,
 				label:        ft.Field(i).Name,
 				htmlName:     id,
 				value:        "",
@@ -44,7 +45,16 @@ func New[F any](form F) *F {
 				form:         "",
 				autofocus:    false,
 			})
+		} else {
+			if field.id() == "" {
+				field.setID(id)
+			}
+
+			if field.name() == "" {
+				field.setName(id)
+			}
 		}
+
 	}
 
 	return &form
@@ -90,6 +100,7 @@ type inputElement interface {
 
 	setBase(base base)
 
+	id() string
 	setID(id string)
 
 	// name is the HTML attribute `name` used in the form.

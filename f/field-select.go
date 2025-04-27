@@ -41,7 +41,7 @@ func SelectField(label string, choices any, ops ...any) Select {
 
 	field := Select{
 		base: base{
-			id:           id,
+			htmlID:       id,
 			label:        label,
 			htmlName:     id,
 			value:        "",
@@ -75,7 +75,7 @@ type Select struct {
 }
 
 func (s *Select) Label() template.HTML {
-	str := `<label for="` + htmlAttr(s.label) + `">`
+	str := `<label for="` + s.htmlID + `">`
 
 	str += s.label
 	if s.required {
@@ -88,7 +88,7 @@ func (s *Select) Label() template.HTML {
 }
 
 func (s *Select) Input() template.HTML {
-	str := `<select id="` + s.id + `"`
+	str := `<select id="` + s.htmlID + `"`
 	str += ` name="` + s.htmlName + `">`
 
 	for _, option := range s.choices {

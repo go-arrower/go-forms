@@ -4,20 +4,18 @@ import (
 	"html/template"
 	"reflect"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
 
 	"github.com/go-arrower/go-forms/f"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestDateTimeLocalField(t *testing.T) {
+func TestNumberField(t *testing.T) {
 	t.Parallel()
 
 	t.Run("implements methods", func(t *testing.T) {
 		t.Parallel()
 
-		field := f.DateTimeLocalField("")
+		field := f.NumberField("")
 		tf := reflect.TypeOf(&field)
 
 		method, exists := tf.MethodByName("Label")
@@ -49,23 +47,23 @@ func TestDateTimeLocalField(t *testing.T) {
 		t.Parallel()
 
 		label := template.HTML(`<label for="label">Label</label>`)
-		html := template.HTML(`<input type="datetime-local" id="label" name="label" value=""/>`)
-		full := template.HTML(`<div><label for="label">Label</label><input type="datetime-local" id="label" name="label" value=""/></div>`)
+		html := template.HTML(`<input type="number" id="label" name="label" value=""/>`)
+		full := template.HTML(`<div><label for="label">Label</label><input type="number" id="label" name="label" value=""/></div>`)
 
-		field := f.DateTimeLocalField("Label")
+		field := f.NumberField("Label")
 
 		assert.Equal(t, label, field.Label())
 		assert.Equal(t, html, field.Input())
 		assert.Equal(t, full, field.Full())
 
-		assert.True(t, field.Value().IsZero())
+		assert.Empty(t, field.Value())
 		assert.Nil(t, field.Errors())
 	})
 
 	t.Run("with id", func(t *testing.T) {
 		t.Parallel()
 
-		field := f.DateTimeLocalField("Label", f.WithID("my-id"))
+		field := f.NumberField("Label", f.WithID("my-id"))
 
 		assert.Contains(t, field.Input(), `id="my-id"`)
 		assert.Contains(t, field.Input(), `name="label"`, "option should only change id attribute")
@@ -75,7 +73,7 @@ func TestDateTimeLocalField(t *testing.T) {
 	t.Run("with name", func(t *testing.T) {
 		t.Parallel()
 
-		field := f.DateTimeLocalField("Label", f.WithName("my-name"))
+		field := f.NumberField("Label", f.WithName("my-name"))
 
 		assert.Contains(t, field.Input(), `name="my-name"`)
 	})
@@ -86,28 +84,24 @@ func TestDateTimeLocalField(t *testing.T) {
 		t.Run("valid", func(t *testing.T) {
 			t.Parallel()
 
-			now := time.Now()
-			exp, err := time.Parse("2006-01-02T15:04", now.Format("2006-01-02T15:04"))
-			assert.NoError(t, err)
+			field := f.NumberField("Label", f.WithValue(0))
 
-			field := f.DateTimeLocalField("Label", f.WithValue(now))
-
-			assert.Equal(t, exp, field.Value())
-			assert.Contains(t, field.Input(), now.Format("2006-01-02T15:04"))
+			assert.Equal(t, 0, field.Value())
+			assert.Contains(t, field.Input(), "0")
 		})
 
 		t.Run("empty", func(t *testing.T) {
 			t.Parallel()
 
-			field := f.DateTimeLocalField("Label", f.WithValue(time.Time{}))
-			assert.Equal(t, time.Time{}, field.Value())
+			field := f.NumberField("Label", f.WithValue(0))
+			assert.Equal(t, 0, field.Value())
 		})
 
 		t.Run("invalid", func(t *testing.T) {
 			t.Parallel()
 
-			assert.PanicsWithValue(t, "go-forms: WithValue for `DateTimeLocal` required a time.Time", func() {
-				f.DateTimeLocalField("Label", f.WithValue(true))
+			assert.PanicsWithValue(t, "go-forms: WithValue for `Number` required an int", func() {
+				f.NumberField("Label", f.WithValue(true))
 			})
 		})
 	})
@@ -115,7 +109,7 @@ func TestDateTimeLocalField(t *testing.T) {
 	t.Run("with disabled", func(t *testing.T) {
 		t.Parallel()
 
-		field := f.DateTimeLocalField("Label", f.WithDisabled())
+		field := f.NumberField("Label", f.WithDisabled())
 
 		assert.Contains(t, field.Input(), " disabled")
 		assert.Contains(t, field.Full(), " disabled")
@@ -124,7 +118,7 @@ func TestDateTimeLocalField(t *testing.T) {
 	t.Run("with readonly", func(t *testing.T) {
 		t.Parallel()
 
-		field := f.DateTimeLocalField("Label", f.WithReadonly())
+		field := f.NumberField("Label", f.WithReadonly())
 
 		assert.Contains(t, field.Input(), " readonly")
 		assert.Contains(t, field.Full(), " readonly")
