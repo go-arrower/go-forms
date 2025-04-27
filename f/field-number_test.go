@@ -131,4 +131,13 @@ func TestNumberField(t *testing.T) {
 
 		assert.Contains(t, field.Input("class", "my-class"), ` class="my-class"`)
 	})
+
+	t.Run("validate", func(t *testing.T) {
+		t.Parallel()
+
+		form := f.New(struct{ Number f.Number }{})
+
+		f.Validate(form, newRequest(""))
+		assert.Equal(t, 0, form.Number.Value())
+	})
 }

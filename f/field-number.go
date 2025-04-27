@@ -116,6 +116,10 @@ func (n *Number) validate() bool {
 }
 
 func (n *Number) setValue(value any) {
+	if value.(string) == "" {
+		return
+	}
+
 	val, err := strconv.Atoi(value.(string))
 	if err != nil {
 		panic("go-forms: this field is implemented incorrectly: `Number` assumes int type for value: " + err.Error())
