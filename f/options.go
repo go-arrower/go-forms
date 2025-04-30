@@ -88,7 +88,6 @@ type (
 	}
 )
 
-//nolint:unused // FIXME
 type (
 	idOption             string
 	nameOption           string
@@ -103,12 +102,10 @@ type (
 	sizeOption           uint8
 	titleOption          string
 	formOption           string
-	tabindexOption       int
+	tabindexOption       int //nolint:unused
 	autofocusOption      bool
 	maxOption            time.Time
 )
-
-// type autocapitalizeEnumeration string
 
 const (
 	On         autocapitalizeOption = "on"
@@ -153,11 +150,17 @@ func (o valueOption) applyTextOption(f *Text) {
 }
 
 func (o valueOption) applyNumberOption(f *Number) {
-	val, ok := o.value.(int)
-	if !ok {
-		panic("go-forms: WithValue for `Number` required an int")
-	}
+	var isInt bool
 
+	val, ok := o.value.(float64)
+	if !ok {
+		_, ok = o.value.(int)
+		if !ok {
+			panic("go-forms: WithValue for `Number` required an float64")
+		}
+		isInt = true
+	}
+	_ = isInt // todo use or remove
 	f.value = val
 	f.hasValue = true
 }
@@ -202,11 +205,23 @@ func (o placeholderOption) applyTextOption(f *Text) {
 	f.placeholder = string(o)
 }
 
+func (o placeholderOption) applyNumberOption(f *Number) {
+	f.placeholder = string(o)
+}
+
 func (o listOption) applyTextOption(f *Text) {
 	f.datalist = o
 }
 
+func (o listOption) applyNumberOption(f *Number) {
+	f.datalist = o
+}
+
 func (o autocompleteOption) applyTextOption(f *Text) {
+	f.autocomplete = string(o)
+}
+
+func (o autocompleteOption) applyNumberOption(f *Number) {
 	f.autocomplete = string(o)
 }
 
@@ -227,6 +242,10 @@ func (o titleOption) applyTextOption(f *Text) {
 }
 
 func (o formOption) applyTextOption(f *Text) {
+	f.form = string(o)
+}
+
+func (o formOption) applyNumberOption(f *Number) {
 	f.form = string(o)
 }
 

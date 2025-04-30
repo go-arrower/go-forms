@@ -125,7 +125,7 @@ func (s *Select) Value() string {
 
 func (s *Select) validate() bool {
 	for _, validator := range s.validators {
-		if err := validator(s.value); err != nil {
+		if err := validator(s, s.value); err != nil {
 			s.errors = append(s.errors, Error{Key: s.label, Message: err.Error()})
 			return false
 		}

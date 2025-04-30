@@ -8,7 +8,7 @@ type base struct {
 	// input types. If an input type has a different type, it has to overwrite
 	// this definition.
 	value      string
-	validators []func(string) error
+	validators []func(field any, value string) error
 	errors     []Error
 
 	required     bool
@@ -21,10 +21,6 @@ type base struct {
 }
 
 var _ inputElement = (*base)(nil)
-
-func (b *base) base() *base {
-	return b
-}
 
 func (b *base) setBase(base base) {
 	*b = base
@@ -46,13 +42,8 @@ func (b *base) setName(name string) {
 	b.htmlName = name
 }
 
-func (b *base) setValue(value any) {
-	val, ok := value.(string)
-	if !ok {
-		panic("go-forms: this field is implemented incorrectly: `base` assumes string type for value")
-	}
-
-	b.value = val
+func (b *base) setValue(value string) {
+	b.value = value
 }
 
 func (b *base) validate() bool {

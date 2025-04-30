@@ -143,6 +143,7 @@ func TestTextField(t *testing.T) {
 			f.WithList([]string{"A", "B"}),
 		)
 
+		assert.Contains(t, field.Input(), ` list="my-id-datalist"`)
 		assert.Contains(t, field.Input(), `<datalist id="my-id-datalist">`)
 		assert.Contains(t, field.Input(), `<option value="A"></option>`)
 		assert.Contains(t, field.Input(), `<option value="B"></option>`)

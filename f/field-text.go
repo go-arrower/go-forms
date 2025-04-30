@@ -92,10 +92,6 @@ func (t *Text) Input() template.HTML {
 		str += ` placeholder="` + t.placeholder + `"`
 	}
 
-	if hasList {
-		str += ` list="` + t.htmlID + `-datalist"`
-	}
-
 	if t.autocomplete != "" {
 		str += ` autocomplete="` + t.autocomplete + `"`
 	}
@@ -137,6 +133,10 @@ func (t *Text) Input() template.HTML {
 		str += ` autofocus`
 	}
 
+	if hasList {
+		str += ` list="` + t.htmlID + `-datalist"`
+	}
+
 	str += `/>`
 
 	if hasList {
@@ -176,7 +176,7 @@ func (t *Text) Value() string {
 
 func (t *Text) validate() bool {
 	for _, validator := range t.validators {
-		if err := validator(t.value); err != nil {
+		if err := validator(t, t.value); err != nil {
 			t.errors = append(t.errors, Error{Key: t.label, Message: err.Error()})
 			return false
 		}

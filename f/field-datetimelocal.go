@@ -15,8 +15,8 @@ func DateTimeLocalField(label string, ops ...dateTimeLocalElement) DateTimeLocal
 			label:    label,
 			htmlName: id,
 			value:    "",
-			validators: []func(string) error{
-				func(value string) error {
+			validators: []func(any, string) error{
+				func(field any, value string) error {
 					_, err := time.ParseInLocation(browserLayout, value, time.UTC)
 					if err != nil {
 						return errors.New("invalid format")
@@ -100,7 +100,7 @@ func (t *DateTimeLocal) Value() time.Time {
 // TODO can this be moved to base?
 func (t *DateTimeLocal) validate() bool {
 	for _, validator := range t.validators {
-		if err := validator(t.value); err != nil {
+		if err := validator(t, t.value); err != nil {
 			t.errors = append(t.errors, Error{Key: t.label, Message: err.Error()})
 			return false
 		}

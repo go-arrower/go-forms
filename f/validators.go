@@ -45,10 +45,27 @@ type (
 	minlengthValidator int
 )
 
-func (val requiredValidator) applyTextOption(f *Text) {
+func (v requiredValidator) applyTextOption(f *Text) {
 	f.required = true
-	f.validators = append(f.validators, func(value string) error {
+	f.validators = append(f.validators, func(field any, value string) error {
 		if value == "" {
+			return errIsRequired
+		}
+
+		return nil
+	})
+}
+
+func (v requiredValidator) applyNumberOption(f *Number) {
+	f.required = true
+
+	f.validators = append(f.validators, func(field any, value string) error {
+		f, ok := field.(*Number)
+		if !ok {
+			return errIsRequired
+		}
+
+		if !f.hasValue {
 			return errIsRequired
 		}
 

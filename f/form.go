@@ -107,9 +107,8 @@ type inputElement interface {
 	name() string
 	setName(name string)
 
-	// setValue takes the val from the http request via FormValue.
-	// The inputElement implementation can cast this to it's preferred type.
-	setValue(value any)
+	// setValue takes the val from the http request via FormValue, and is always a string
+	setValue(value string)
 }
 
 // htmlAttr takes a label given by the user and converts in into a form,

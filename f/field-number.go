@@ -1,6 +1,7 @@
 package f
 
 import (
+	"errors"
 	"html/template"
 	"strconv"
 )
@@ -23,7 +24,12 @@ func NumberField(label string, ops ...numberElement) Number {
 			form:         "",
 			autofocus:    false,
 		},
-		hasValue: false,
+		readonly:     false,
+		hasValue:     false,
+		value:        0,
+		placeholder:  "",
+		datalist:     nil,
+		autocomplete: "",
 	}
 
 	for _, opt := range ops {
@@ -36,8 +42,13 @@ func NumberField(label string, ops ...numberElement) Number {
 type Number struct {
 	base
 	readonly bool
-	hasValue bool
-	value    int
+	// hasValue is used to distinguish between the default value 0 for int and empty
+	// this is necessary, to differentiate when checking for the required option.
+	hasValue     bool
+	value        float64
+	placeholder  string
+	datalist     []string
+	autocomplete string
 }
 
 func (n *Number) Label() template.HTML {
@@ -54,10 +65,12 @@ func (n *Number) Label() template.HTML {
 }
 
 func (n *Number) Input(attr ...string) template.HTML {
+	hasList := len(n.datalist) > 0
+
 	var value string
 
 	if n.hasValue {
-		value = strconv.Itoa(n.value)
+		value = strconv.FormatFloat(n.value, 'f', 10, 64)
 	}
 
 	str := `<input type="number" id="` + n.htmlID + `"`
@@ -70,6 +83,10 @@ func (n *Number) Input(attr ...string) template.HTML {
 		}
 	}
 
+	if n.required {
+		str += ` required`
+	}
+
 	if n.disabled {
 		str += ` disabled`
 	}
@@ -78,7 +95,33 @@ func (n *Number) Input(attr ...string) template.HTML {
 		str += ` readonly`
 	}
 
+	if n.placeholder != "" {
+		str += ` placeholder="` + n.placeholder + `"`
+	}
+
+	if n.autocomplete != "" {
+		str += ` autocomplete="` + n.autocomplete + `"`
+	}
+
+	if n.form != "" {
+		str += ` form="` + n.form + `"`
+	}
+
+	if hasList {
+		str += ` list="` + n.htmlID + `-datalist"`
+	}
+
 	str += `/>`
+
+	if hasList {
+		str += `<datalist id="` + n.htmlID + `-datalist">`
+
+		for _, o := range n.datalist {
+			str += `<option value="` + o + `"></option>`
+		}
+
+		str += `</datalist>`
+	}
 
 	return template.HTML(str)
 }
@@ -100,13 +143,13 @@ func (n *Number) Errors() []Error {
 	return n.errors
 }
 
-func (n *Number) Value() int {
+func (n *Number) Value() float64 {
 	return n.value
 }
 
 func (n *Number) validate() bool {
 	for _, validator := range n.validators {
-		if err := validator(strconv.Itoa(n.value)); err != nil {
+		if err := validator(n, strconv.FormatFloat(n.value, 'f', 10, 64)); err != nil {
 			n.errors = append(n.errors, Error{Key: n.label, Message: err.Error()})
 			return false
 		}
@@ -115,14 +158,13 @@ func (n *Number) validate() bool {
 	return true
 }
 
-func (n *Number) setValue(value any) {
-	if value.(string) == "" {
-		return
-	}
-
-	val, err := strconv.Atoi(value.(string))
+// todo does the http request always give a string? than make this clear here, so the method does only parsing not casting
+func (n *Number) setValue(value string) {
+	val, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		panic("go-forms: this field is implemented incorrectly: `Number` assumes int type for value: " + err.Error())
+		n.validators = append(n.validators, func(field any, value string) error {
+			return errors.New("value must be float64")
+		})
 	}
 
 	n.value = val
@@ -135,10 +177,10 @@ var (
 	_ numberElement = (*valueOption)(nil)
 	_ numberElement = (*disabledOption)(nil)
 	_ numberElement = (*readonlyOption)(nil)
-	//_ numberElement = (*placeholderOption)(nil)
-	//_ numberElement = (*listOption)(nil)
-	//_ numberElement = (*requiredValidator)(nil)
-	//_ numberElement = (*autocompleteOption)(nil)
-	//_ numberElement = (*formOption)(nil)
+	_ numberElement = (*placeholderOption)(nil)
+	_ numberElement = (*listOption)(nil)
+	_ numberElement = (*requiredValidator)(nil)
+	_ numberElement = (*autocompleteOption)(nil)
+	_ numberElement = (*formOption)(nil)
 	//  max, min, step (float),
 )
