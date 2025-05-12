@@ -94,10 +94,10 @@ func TestNumberField(t *testing.T) {
 		t.Run("valid int", func(t *testing.T) {
 			t.Parallel()
 
-			field := f.NumberField("Label", f.WithValue(0))
+			field := f.NumberField("Label", f.WithValue(5))
 
-			assert.Equal(t, 0.0, field.Value())
-			assert.Contains(t, field.Input(), "0")
+			assert.Equal(t, 5.0, field.Value())
+			assert.Contains(t, field.Input(), "5")
 		})
 
 		t.Run("empty", func(t *testing.T) {
@@ -110,7 +110,7 @@ func TestNumberField(t *testing.T) {
 		t.Run("invalid", func(t *testing.T) {
 			t.Parallel()
 
-			assert.PanicsWithValue(t, "go-forms: WithValue for `Number` required an float64", func() {
+			assert.PanicsWithValue(t, "go-forms: WithValue for `Number` required an float64 or int", func() {
 				f.NumberField("Label", f.WithValue(true))
 			})
 		})
@@ -185,6 +185,14 @@ func TestNumberField(t *testing.T) {
 		field := f.NumberField("Label")
 
 		assert.Contains(t, field.Input("class", "my-class"), ` class="my-class"`)
+	})
+
+	t.Run("with step", func(t *testing.T) {
+		t.Parallel()
+
+		field := f.NumberField("Label", f.WithStep(0.01))
+
+		assert.Contains(t, field.Input(), ` step="0.01"`)
 	})
 
 	t.Run("validate", func(t *testing.T) {

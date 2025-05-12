@@ -70,6 +70,10 @@ func WithMax(max time.Time) maxOption {
 	return maxOption(max)
 }
 
+func WithStep(step float64) stepOption {
+	return stepOption(step)
+}
+
 type (
 	textElement interface {
 		applyTextOption(f *Text)
@@ -105,6 +109,7 @@ type (
 	tabindexOption       int //nolint:unused
 	autofocusOption      bool
 	maxOption            time.Time
+	stepOption           float64
 )
 
 const (
@@ -150,17 +155,15 @@ func (o valueOption) applyTextOption(f *Text) {
 }
 
 func (o valueOption) applyNumberOption(f *Number) {
-	var isInt bool
-
 	val, ok := o.value.(float64)
 	if !ok {
-		_, ok = o.value.(int)
+		iv, ok := o.value.(int)
 		if !ok {
-			panic("go-forms: WithValue for `Number` required an float64")
+			panic("go-forms: WithValue for `Number` required an float64 or int")
 		}
-		isInt = true
+		val = float64(iv)
 	}
-	_ = isInt // todo use or remove
+
 	f.value = val
 	f.hasValue = true
 }
@@ -255,4 +258,8 @@ func (o autofocusOption) applyTextOption(f *Text) {
 
 func (o maxOption) applyDateTimeLocalOption(f *DateTimeLocal) {
 	// f.max = time.Time(o)
+}
+
+func (o stepOption) applyNumberOption(f *Number) {
+	f.step = float64(o)
 }

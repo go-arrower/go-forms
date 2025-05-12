@@ -49,6 +49,7 @@ type Number struct {
 	placeholder  string
 	datalist     []string
 	autocomplete string
+	step         float64
 }
 
 func (n *Number) Label() template.HTML {
@@ -70,12 +71,16 @@ func (n *Number) Input(attr ...string) template.HTML {
 	var value string
 
 	if n.hasValue {
-		value = strconv.FormatFloat(n.value, 'f', 10, 64)
+		value = strconv.FormatFloat(n.value, 'f', -1, 64)
 	}
 
 	str := `<input type="number" id="` + n.htmlID + `"`
 	str += ` name="` + n.htmlName + `"`
 	str += ` value="` + value + `"`
+
+	if n.step != 0 {
+		str += ` step="` + strconv.FormatFloat(n.step, 'f', -1, 64) + `"`
+	}
 
 	if len(attr) > 0 && len(attr)%2 == 0 {
 		if attr[0] == "class" {
@@ -182,5 +187,6 @@ var (
 	_ numberElement = (*requiredValidator)(nil)
 	_ numberElement = (*autocompleteOption)(nil)
 	_ numberElement = (*formOption)(nil)
+	_ numberElement = (*stepOption)(nil)
 	//  max, min, step (float),
 )
