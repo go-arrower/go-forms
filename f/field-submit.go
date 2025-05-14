@@ -5,7 +5,7 @@ import (
 )
 
 func SubmitButton(label string, ops ...submitElement) Submit {
-	field := Submit{label: label}
+	field := Submit{base: base{label: label}}
 
 	for _, opt := range ops {
 		opt.applySubmitOption(&field)
@@ -16,7 +16,6 @@ func SubmitButton(label string, ops ...submitElement) Submit {
 
 type Submit struct {
 	base
-	label string
 }
 
 func (s *Submit) Label() template.HTML {
