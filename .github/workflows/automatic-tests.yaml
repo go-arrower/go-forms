@@ -13,7 +13,7 @@ jobs:
       - name: Run linters
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.60.3
+          version: v1.64.8
           args: --config=.config/golangci.yaml --timeout=5m
 
   security-scan:
